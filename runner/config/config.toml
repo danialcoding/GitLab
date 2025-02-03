@@ -1,0 +1,19 @@
+[[runners]]
+  name = "git_runner"
+  url = "http://gitlab.local"
+  token = "glrt-t1_dvyrpySVaZzgsdDUzBaE"
+  executor = "docker"
+  [runners.custom_build_dir]
+  [runners.docker]
+    tls_verify = false
+    image = "docker:latest"
+    privileged = true
+    disable_entrypoint_overwrite = false
+    volumes = ["/var/run/docker.sock:/var/run/docker.sock"]
+    networks = ["gitlab-network"]
+    network_mode = "host"  # اضافه کردن network_mode
+    extra_hosts = ["gitlab.local:172.18.0.2"]  # اضافه کردن extra_hosts
+  [runners.cache]
+    [runners.cache.s3]
+    [runners.cache.gcs]
+    tag_list = ["ci-cd", "order-tracker"]
