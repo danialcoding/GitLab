@@ -1,7 +1,11 @@
+# Example only. setup_runner.sh rewrites /etc/gitlab-runner/config.toml
+# on every container start from RUNNER_TOKEN and GITLAB_URL.
+# The generated file is gitignored. Do not put a real token in this file.
+
 [[runners]]
   name = "git_runner"
   url = "http://gitlab.local"
-  token = "glrt-t1_dvyrpySVaZzgsdDUzBaE"
+  token = "${RUNNER_TOKEN}"
   executor = "docker"
   [runners.custom_build_dir]
   [runners.docker]
@@ -11,8 +15,8 @@
     disable_entrypoint_overwrite = false
     volumes = ["/var/run/docker.sock:/var/run/docker.sock"]
     networks = ["gitlab-network"]
-    network_mode = "host"  # اضافه کردن network_mode
-    extra_hosts = ["gitlab.local:172.18.0.2"]  # اضافه کردن extra_hosts
+    network_mode = "host"
+    extra_hosts = ["gitlab.local:172.18.0.2"]
   [runners.cache]
     [runners.cache.s3]
     [runners.cache.gcs]

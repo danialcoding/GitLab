@@ -1,0 +1,7 @@
+.env
+.git
+config
+logs
+data
+runner/config/config.toml
+runner/config/.runner_system_id

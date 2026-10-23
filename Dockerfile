@@ -1,11 +1,8 @@
-# استفاده از تصویر پایه GitLab Runner
+# Custom GitLab Runner image. The entrypoint registers, then runs the runner.
 FROM gitlab/gitlab-runner:latest
 
-# کپی اسکریپت راه‌اندازی
 COPY setup_runner.sh /setup_runner.sh
 
-# دادن مجوز اجرایی به اسکریپت
 RUN chmod +x /setup_runner.sh
 
-# اجرای اسکریپت راه‌اندازی هنگام شروع کانتینر
 ENTRYPOINT ["/setup_runner.sh"]

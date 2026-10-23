@@ -1,28 +1,29 @@
 #!/bin/bash
 
-# آدرس گیت‌لب
-GITLAB_URL="http://gitlab.local"  # این آدرس را به آدرس گیت‌لب خود تغییر دهید
-GITLAB_URL_RUNNER="http://gitlab"
+# Non-interactive GitLab Runner setup for the Compose service in this repo.
+# RUNNER_TOKEN is the runner authentication token (glrt-...). It is never
+# baked into the image. GITLAB_URL defaults to the Compose hostname.
 
-# توکن ثبت‌نام رانر
-REGISTRATION_TOKEN="glrt-t1_dvyrpySVaZzgsdDUzBaE"  # توکن ثبت‌نام خود را وارد کنید
+GITLAB_URL="${GITLAB_URL:-http://gitlab.local}"
 
-# مسیر فایل پیکربندی
+if [ -z "${RUNNER_TOKEN:-}" ]; then
+  echo "ERROR: RUNNER_TOKEN is not set." >&2
+  echo "Copy .env.example to .env, set RUNNER_TOKEN, and start the stack again." >&2
+  exit 1
+fi
+
 CONFIG_FILE="/etc/gitlab-runner/config.toml"
 
-# پاک کردن فایل config.toml اگر وجود داشته باشد
+# Recreate the config on every start so the mounted file matches the env vars.
 echo "Cleaning up old config.toml..."
-rm -f $CONFIG_FILE
+rm -f "$CONFIG_FILE"
 
-  
-
-# ایجاد فایل config.toml جدید با تنظیمات اولیه
 echo "Creating new config.toml..."
-cat <<EOF > $CONFIG_FILE
+cat <<EOF > "$CONFIG_FILE"
 [[runners]]
   name = "git_runner"
   url = "$GITLAB_URL"
-  token = "$REGISTRATION_TOKEN"
+  token = "$RUNNER_TOKEN"
   executor = "docker"
   [runners.custom_build_dir]
   [runners.docker]
@@ -32,26 +33,25 @@ cat <<EOF > $CONFIG_FILE
     disable_entrypoint_overwrite = false
     volumes = ["/var/run/docker.sock:/var/run/docker.sock"]
     networks = ["gitlab-network"]
-    network_mode = "host"  
+    network_mode = "host"
     extra_hosts = ["gitlab.local:172.18.0.2"]
   [runners.cache]
     [runners.cache.s3]
     [runners.cache.gcs]
-    tag_list = ["ci-cd", "order-tracker"]   
+    tag_list = ["ci-cd", "order-tracker"]
 EOF
 
-# پیغام موفقیت در ایجاد config.toml
 echo "config.toml created successfully!"
 
-# صبر کردن برای آماده شدن GitLab (20 ثانیه تاخیر)
+# GitLab's first boot is much slower than this pause. Registration is
+# retried by restarting the container once GitLab answers.
 echo "Waiting for GitLab to be ready..."
-sleep 5  # 20 ثانیه تاخیر
+sleep 5
 
-# اجرای دستور ثبت‌نام
 gitlab-runner register \
   --non-interactive \
   --url "$GITLAB_URL" \
-  --registration-token "$REGISTRATION_TOKEN" \
+  --registration-token "$RUNNER_TOKEN" \
   --executor "docker" \
   --description "docker-runner" \
   --docker-image "docker:latest" \
@@ -61,8 +61,6 @@ gitlab-runner register \
   --run-untagged \
   --locked="false"
 
-# پیغام موفقیت
 echo "GitLab Runner successfully registered!"
 
-# شروع به اجرای GitLab Runner
 gitlab-runner run
