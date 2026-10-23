@@ -11,7 +11,7 @@ This repository is a local lab setup. It is not a hardened production install.
 - **gitlab** — `gitlab/gitlab-ce:latest`, hostname `gitlab.local`. Host ports are 80 (HTTP), 443, and 2222 (Git SSH). `external_url` is `http://gitlab.local`, so this file does not configure TLS.
 - **gitlab-runner** — built from the `Dockerfile` in this repo. On start, `setup_runner.sh` writes `/etc/gitlab-runner/config.toml` from environment variables, runs `gitlab-runner register` non-interactively, then `gitlab-runner run`.
 
-GitLab data is stored in host directories (`./config`, `./logs`, `./data`). Runner state is stored in `./runner/config`. Those paths are gitignored because they contain secrets after the first boot.
+GitLab data is stored in host directories (`./config`, `./logs`, `./data`). Those directories are gitignored. Generated runner files under `./runner/config` (`config.toml` and `.runner_system_id`) are gitignored as well. `runner/config/config.toml.example` stays in git and contains a `${RUNNER_TOKEN}` placeholder.
 
 The runner authentication token and the initial root password are not stored in the repository. Copy `.env.example` to `.env` and set them there.
 
