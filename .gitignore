@@ -1,0 +1,14 @@
+# Local secrets. Copy .env.example to .env and fill it in.
+.env
+
+# GitLab CE data created by the Compose volume mounts.
+# After the first boot these directories contain secrets
+# (gitlab-secrets.json, the initial root password, and so on).
+/config/
+/logs/
+/data/
+
+# Generated when the runner container starts. config.toml holds the
+# runner authentication token; .runner_system_id is per-machine state.
+runner/config/*
+!runner/config/config.toml.example
